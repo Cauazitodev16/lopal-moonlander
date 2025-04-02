@@ -17,16 +17,18 @@ let moduloLunar = {
         x: 100,
         y: 100
     },
-    angulo: 0,
+    angulo: -Math.PI/2,
     largura: 20,
     altura: 20,
     cor: "lightgray",
     motorLigado: false,
     velocidade: {
-        x: 0,
+        x: 2,
         y: 0
     },
-    combustível: 1000
+    combustível: 1000,
+    rotacaoAntiHorario: false,
+    rotacaoHorario: false
 }
 
 // Visualização:
@@ -91,10 +93,14 @@ function desenhar() {
     if(moduloLunar.posicao.y >= (canvas.height - 0.5 * moduloLunar.altura)){
         moduloLunar.posicao.y = 600;
         
-        if(moduloLunar.velocidade.y >=0.5){
-          return alert("Você se lascou")
+        if(moduloLunar.velocidade.y >=0.5 || 
+            moduloLunar.velocidade.z != 0.1 ||
+            5 < moduloLunar.angulo && moduloLunar || moduloLunar.angulo < -5
+        )
+            {
+          return alert("Você se lascou, foi de Vasco da Gama kkkkkk");
         }else{
-          return alert("Você é conseguiu, piloto profissional!!")
+          return alert("Você é conseguiu, piloto profissional!!");
 
         }
     }
@@ -108,6 +114,13 @@ document.addEventListener("keydown", teclaPressionada);
 function teclaPressionada(evento) {
     if (evento.keyCode == 38 && moduloLunar.combustível > 0) {
         moduloLunar.motorLigado = true;
+    } else if(evento.keyCode == 39){
+        moduloLunar.rotacaoAntiHorario = true;
+        
+
+    }else if(evento.keyCode == 37){
+       moduloLunar.rotacaoHorario = true;
+
     }
 }
 // O programa compreende como "motorLigado = false" quando a tecla de seta para cima não está pressionada.
@@ -115,21 +128,45 @@ document.addEventListener("keyup", teclaSolta);
 function teclaSolta(evento) {
     if (evento.keyCode == 38) {
         moduloLunar.motorLigado = false;
+    } else if(evento.keyCode == 39){
+        moduloLunar.rotacaoAntiHorario = false;
+
+    }else if(evento.keyCode == 37){
+        moduloLunar.rotacaoHorario = false;
     }
 }
 let gravidade = 0.03;
 function atracaoGravitacional() {
     moduloLunar.posicao.x += moduloLunar.velocidade.x;
     moduloLunar.posicao.y += moduloLunar.velocidade.y;
-    if (moduloLunar.motorLigado) {
-        if (moduloLunar.combustível > 0) {
-            moduloLunar.velocidade.y -= 0.06
-            moduloLunar.combustível -= 1;
-        } else {
-            moduloLunar.combustível = 0;
+    if(moduloLunar.rotacaoAntiHorario){
+        moduloLunar.angulo += Math.PI/180;
+        
+    } else if (moduloLunar.rotacaoHorario){
+        moduloLunar.angulo -= Math.PI/180;
+
+        if (moduloLunar.motorLigado) {
+            if (moduloLunar.combustível > 0) {
+        
+                moduloLunar.combustível -= 5;
+            } else {
+                moduloLunar.motorLigado = false;
+                moduloLunar.combustível = 0;
+            }
         }
+       
     }
-    moduloLunar.velocidade.y += gravidade;
-}
+        
+    
+
+    if (moduloLunar.motorLigado) {
+        moduloLunar.velocidade.y -= 0.05 * Math.cos(moduloLunar.angulo);
+        moduloLunar.velocidade.x += 0.05 * Math.sin(moduloLunar.angulo);
+       
+       }
+        moduloLunar.velocidade.y += gravidade;
+
+
+   }
 
 desenhar();
